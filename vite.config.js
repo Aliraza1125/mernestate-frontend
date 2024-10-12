@@ -6,8 +6,9 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:3000",
-        secure: false,
+        target: "https://mernestate-backend-3.onrender.com",
+        secure: true, // Change to true if your backend is using HTTPS
+        changeOrigin: true, // Add this to handle cross-origin issues
       },
     },
   },

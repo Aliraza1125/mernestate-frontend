@@ -8,7 +8,6 @@ import {
 import { app } from "../firebase";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import config from '../config'; 
 
 export default function CreateListing() {
   const { currentUser } = useSelector((state) => state.user);
@@ -124,39 +123,30 @@ export default function CreateListing() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (formData.imageUrls.length < 1) {
-        setError("You must upload at least one image");
-        return;
-      }
-      if (+formData.regularPrice < +formData.discountPrice) {
-        setError("Discount price must be lower than regular price");
-        return;
-      }
+      if (formData.imageUrls.length < 1)
+        return setError("You must upload at least one image");
+      if (+formData.regularPrice < +formData.discountPrice)
+        return setError("Discount price must be lower than reqular price");
       setLoading(true);
-      setError(null);
-  
-      const res = await fetch(`${config.apiUrl}/listing/create`, {
+      setError(false);
+      const res = await fetch("/api/listing/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: 'include',  // This is important for sending cookies
         body: JSON.stringify({
           ...formData,
           userRef: currentUser._id,
         }),
       });
-  
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to create listing');
-      }
-  
       const data = await res.json();
       setLoading(false);
+      if (data.success === false) {
+        setError(data.message);
+      }
       navigate(`/listing/${data._id}`);
     } catch (error) {
-      setError(error.message || 'An unexpected error occurred');
+      setError(error.message);
       setLoading(false);
     }
   };
